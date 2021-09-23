@@ -8,7 +8,8 @@ public class Banco {
     private int modo, cantCajeros;
     private ArrayList<Cajero> cajeros = new ArrayList();
     private Cola personas = new Cola();
-
+    private Time t = new Time(); 
+    
     public Banco(int modo, int cantCajeros) {
         this.modo = modo;
         this.cantCajeros = cantCajeros;
@@ -33,13 +34,15 @@ public class Banco {
         crearCajeros();
         int random = (int) (Math.random() * (cantCajeros));
         cajeros.get(random).setP((Persona) personas.frente(personas));
-        cajeros.get(random).getP().setTiempo((int) (Math.random() * (3) + 1),random);
+        cajeros.get(random).getP().setNumeroDeCajero(random);
         cajeros.get(random).getP().start();
         cajeros.get(random).getTransacciones().mete(transaccionRandom(), cajeros.get(random).getTransacciones());
         personas.quita(personas);
         boolean b = false;
-        while (personas.vacia(personas) == false) {
-            
+        //t.start();
+        t.start();
+        while (t.isAlive()) {
+            //personas.pone(new Persona(randomName(),randomLastName(),(int)(Math.random()*(80-18+1)+18)), personas);
             for (int i = 0; i < cajeros.size(); i++) {
               
                 if(cajeros.get(i).getP().isAlive()){//si el cajero está ocupado, no hago nada
@@ -48,7 +51,8 @@ public class Banco {
                 else{ //si no está ocupado, hago pasar al que está de primero en la cola
                     if(personas.vacia(personas)==false){
                         cajeros.get(i).setP((Persona) personas.frente(personas));
-                        cajeros.get(i).getP().setTiempo((int) (Math.random() * (3) + 1),i);
+                        //cajeros.get(i).getP().setTiempo((int) (Math.random() * (3) + 1),i);
+                        cajeros.get(i).getP().setNumeroDeCajero(i);
                         cajeros.get(i).getP().start();
                         cajeros.get(i).getTransacciones().mete(transaccionRandom(), cajeros.get(i).getTransacciones());
                         personas.quita(personas);
@@ -71,30 +75,30 @@ public class Banco {
                 
             }
         }
-        if(b){
-            printPilas();
-        }
+        printPilas();
+        System.out.println("Size de la cola de personas: "+personas.getLista().size());
+        personas.printLista(personas);
     }
     
     private void llenadoDePersonas(Cola C) {
-        int random = 0;
         if(modo==1){
-            if(cantCajeros>=6){
-                int a = cantCajeros*15, b = cantCajeros*14; //de 1 a 5 cajeros, multiplicar a y b por un número más grande
-                random = (int)(Math.random()*(a-b+1)+b);
-            }
-            else{
-                int a = cantCajeros*22, b = cantCajeros*21; 
-                random = (int)(Math.random()*(a-b+1)+b);
+            float acum = 0;
+            while((acum/cantCajeros)<120){
+                Persona person = new Persona(randomName(), randomLastName(), (int) (Math.random() * (80 - 18 + 1) + 18));
+                person.setTiempo((int) (Math.random() * (3) + 1));
+                C.pone(person, C);
+                acum+=person.getTiempo();
             }
             
         }
         else if(modo == 2){
-            random = (int) (Math.random() * (30 - 25 + 1) + 25);
-        }
-        
-        for (int i = 0; i < random; i++) {
-            C.pone(new Persona(randomName(), randomLastName(), (int) (Math.random() * (80 - 18 + 1) + 18)), C);
+            int random;
+            random = (int) (Math.random() * (10 - 5 + 1) + 5);
+            for (int i = 0; i < random; i++) {
+                Persona person = new Persona(randomName(), randomLastName(), (int) (Math.random() * (80 - 18 + 1) + 18));
+                person.setTiempo((int) (Math.random() * (3) + 1));
+                C.pone(person, C);
+            }
         }
     }
 
@@ -148,11 +152,10 @@ public class Banco {
             }
         }*/
         for(int i=0; i<cajeros.size(); i++){
-            System.out.println("Pila #" + (i + 1) + " [Cajero "+(i+1)+", hubieron "
+            System.out.println("\nPILA #" + (i + 1) + " [Cajero "+(i+1)+", hubieron "
                     +(cajeros.get(i).getTransacciones().getLista().size()) + " transacciones]: ");
             if (cajeros.get(i).getTransacciones().vacia(cajeros.get(i).getTransacciones()) == false){
                 for(int j=0; j<cajeros.get(i).getTransacciones().getLista().size(); j++){
-                    Thread.sleep(1000);
                     System.out.println(cajeros.get(i).getTransacciones().getLista().get(j));
                 }
             }
@@ -161,10 +164,13 @@ public class Banco {
     
     //MODO 2 DEL BANCO
     private void modo2() throws InterruptedException{
+        t.start();
         createAllColas(); //crea primero los cajeros, luego llena las colas de personas de cada cajero
         printPeople();
         boolean b = false;
-        while(areColasEmpty()==false){
+        
+        dynamicPutPersona();
+        while(t.isAlive()){ //while(areColasEmpty()==false
             for(int i=0; i<cajeros.size(); i++){
                 if(cajeros.get(i).getP().isAlive()){
                     
@@ -172,7 +178,8 @@ public class Banco {
                 else{
                     if(cajeros.get(i).getPersonas().vacia(cajeros.get(i).getPersonas())==false){
                         cajeros.get(i).setP((Persona) (cajeros.get(i).getPersonas().frente(cajeros.get(i).getPersonas())) );
-                        cajeros.get(i).getP().setTiempo((int)(Math.random()*(3)+1), i);
+                        //cajeros.get(i).getP().setTiempo((int)(Math.random()*(3)+1), i);
+                        cajeros.get(i).getP().setNumeroDeCajero(i);
                         cajeros.get(i).getP().start();
                         cajeros.get(i).getTransacciones().mete(transaccionRandom(), cajeros.get(i).getTransacciones());
                         cajeros.get(i).getPersonas().quita(cajeros.get(i).getPersonas());
@@ -193,6 +200,11 @@ public class Banco {
             }
         }
         printPilas();
+        System.out.println("Cola de personas, actualizado: ");
+        for(int i=0; i<cajeros.size(); i++){
+            //cajeros.get(i).getPersonas().printLista(cajeros.get(i).getPersonas());
+            System.out.println( cajeros.get(i).getPersonas().getLista().size());
+        }
     }
     
     //LLenar cada cola de Personas de cada cajero, EXCLUSIVO del modo 2
@@ -203,6 +215,7 @@ public class Banco {
         }
     }
     
+    //Imprime las colas de personas de todos los cajeros
     private void printPeople(){
         for(int i=0;i <cajeros.size(); i++){
             System.out.println("Cola #"+(i+1));
@@ -212,8 +225,42 @@ public class Banco {
         }
     }
     
+    //pone a una persona en la cola con menos personas
+    private void dynamicPutPersona(){
+        while(tiempoTotal()<110){
+            int menor = 999999999, pos = 0;
+            for(int i=0; i<cajeros.size(); i++){
+                if(cajeros.get(i).getPersonas().getLista().size()<menor){
+                    menor = cajeros.get(i).getPersonas().getLista().size();
+                    pos = i;
+                }
+            }
+            Persona p = new Persona(randomName(), randomLastName(), (int) (Math.random() * (80 - 18 + 1) + 18));
+            p.setTiempo((int) (Math.random() * (3) + 1));
+            cajeros.get(pos).getPersonas().pone(p, cajeros.get(pos).getPersonas());
+        }
+        
+    }
+    
+    private float tiempoTotal(){
+        float acum = 0;
+        //ArrayList list = new ArrayList(); 
+        for(int i=0; i<cajeros.size(); i++){
+            for(int j=0; j<cajeros.get(i).getPersonas().getLista().size(); j++){
+                Persona p = (Persona)cajeros.get(i).getPersonas().getLista().get(j);
+                acum+=p.getTiempo();
+            }
+        }
+        return acum/cantCajeros;
+    }
+    
+    /*private void finish(){
+        for(int i=0; i<cajeros.size(); i++){
+            cajeros.get(i).getPersonas().anula(cajeros.get(i).getPersonas());
+        }
+    }*/
     //Método para el modo 2, me dice si ya están vacías todas las colas de personas o no
-    private boolean areColasEmpty(){ //¿?
+    /*private boolean areColasEmpty(){ //¿?
         boolean b = false;
         for(int i=0; i<cajeros.size(); i++){
             if(cajeros.get(i).getPersonas().vacia(cajeros.get(i).getPersonas())){
@@ -225,9 +272,8 @@ public class Banco {
             }
         }
         return b;
-    }
+    }*/
     
-
     //Entrada, inicio del programa
     public static int[] menuInicio() {
         Scanner sc = new Scanner(System.in);

@@ -27,13 +27,13 @@ public class Persona extends Thread{
     @Override
     public void run(){
         try {
-            String m1 = red+"En Cajero #"+(numeroDeCajero+1)+" se está atendiendo a ";
+            String m1 = red+"En Cajero #"+(getNumeroDeCajero()+1)+" se está atendiendo a ";
             //System.out.println("En Cajero #"+(numeroDeCajero+1)+" se está atendiendo a "
                     //+getNombre()+" "+getApellido() +  "... ["+getTiempo()+" segundos]");
             String lol = reset+"... ["+getTiempo()+" segundos]";
             System.out.println(m1+purple+getNombre()+" "+getApellido() + lol);
             Thread.sleep(getTiempo()*1000);
-            String m2 = "\n"+green+"Cajero #"+(numeroDeCajero+1)+" está libre!";
+            String m2 = "\n"+green+"Cajero #"+(getNumeroDeCajero()+1)+" está libre!";
             //System.out.println("\nCajero #"+(numeroDeCajero+1)+" está libre!");
             System.out.println(m2);
         } catch (Exception e) {
@@ -60,10 +60,20 @@ public class Persona extends Thread{
         return tiempo;
     }
 
-    public void setTiempo(int tiempo, int numeroDeCajero) {
+    public void setTiempo(int tiempo) {
         this.tiempo = tiempo;
+        
+    }
+
+    public int getNumeroDeCajero() {
+        return numeroDeCajero;
+    }
+
+    public void setNumeroDeCajero(int numeroDeCajero) {
         this.numeroDeCajero = numeroDeCajero;
     }
+    
+    
 
     @Override
     public String toString() {

@@ -6,10 +6,15 @@ public class Lista {
     protected ArrayList lista = new ArrayList();
     
     public void printLista(Lista L){
-        for (int i = 0; i < L.getLista().size(); i++) {
-            System.out.println(L.getLista().get(i));
+        if(L.getLista().isEmpty()){
+            System.out.println("Vacío...");
         }
-        //System.out.println();
+        else{
+            for (int i = 0; i < L.getLista().size(); i++) {
+                System.out.println(L.getLista().get(i));
+            }
+        }
+
     }
 
     public ArrayList getLista() {
